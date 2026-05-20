@@ -1,17 +1,52 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+import oracle.net.jdbc.TNSAddress.SOException;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String insert = "INSERT INTO EMPLEADO VALUES (?,?,?)";
+
+        try (Connection conn = DriverManager.getConnection(
+                DBConfig.getUrl(),
+                DBConfig.getUser(),
+                DBConfig.getPassword())) {
+            /**
+             * Pone a false el autoCommit
+             */
+            conn.setAutoCommit(false);
+
+            System.out.println("Indique cuantos empleados desea añadir");
+            int empleados =  sc.nextInt();
+            sc.nextLine();
+
+            try (PreparedStatement ps = conn.prepareStatement(insert)) {
+                for (int i = 1; i <= empleados; i++) {
+                    System.out.println("Indique el id del empleado");
+                    int id = sc.nextInt();
+                    sc.nextLine();
+                    System.out.println("Indique el nombre del empleado");
+                    String nombre = sc.nextLine();
+                    System.out.println("Indique el salario del empleado");
+                    double salario = sc.nextDouble();
+                    sc.nextLine();
+                    ps.setInt(1, id);
+                    ps.setString(2, nombre);
+                    ps.setDouble(3, salario);
+                    ps.executeUpdate();
+                    System.out.println("Empleado " + nombre + " añadido correctamente");
+                }
+                System.out.println("Empleados añadidos correctamente. Realizando un commit");
+                conn.commit();
+            } catch (SQLException ex) {
+                System.out.println("Error al añadir el empleado. Realizando rollback");
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al conectar: " + e.getMessage());
         }
     }
 }

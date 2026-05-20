@@ -1,7 +1,6 @@
 package org.example;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 public class DBConfig {
